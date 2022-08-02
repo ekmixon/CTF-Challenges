@@ -47,8 +47,7 @@ class Toolbox(object):
 
     def _encrypt(self, key, plaintext, iv=''):
         cipher = AES.new(key=key, mode=AES.MODE_CBC, IV=iv)
-        ciphertext = cipher.encrypt(self._pkcs5_pad(plaintext))
-        return ciphertext
+        return cipher.encrypt(self._pkcs5_pad(plaintext))
 
     def _decrypt(self, key, ciphertext, iv=''):
         cipher = AES.new(key=key, mode=AES.MODE_CBC, IV=iv)
@@ -72,10 +71,7 @@ class Toolbox(object):
         hmac_obj.update(ciphertext)
         our_hmac = hmac_obj.digest()
 
-        if self.is_equal(msg_hmac, our_hmac):
-            return ciphertext
-        else:
-            return None
+        return ciphertext if self.is_equal(msg_hmac, our_hmac) else None
 
     def encrypt(self, plaintext):
         plaintext = bytes(plaintext)
@@ -110,9 +106,4 @@ class Toolbox(object):
 
         # Ensure that the message was not modified
         ciphertext = self._verify_and_strip_hmac(ciphertext)
-        if not ciphertext:
-            return None
-
-        plaintext = self._decrypt(self.enc_key, ciphertext, iv)
-
-        return plaintext
+        return self._decrypt(self.enc_key, ciphertext, iv) if ciphertext else None

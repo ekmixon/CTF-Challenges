@@ -17,7 +17,7 @@ import hashlib
 
 
 if len(sys.argv) != 3:
-    print("USAGE: %s <cleartext.csv> <hashed.csv>" % sys.argv[0], file=sys.stderr)
+    print(f"USAGE: {sys.argv[0]} <cleartext.csv> <hashed.csv>", file=sys.stderr)
     sys.exit(1)
 
 with open(sys.argv[1], "rb") as ifile:

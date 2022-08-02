@@ -9,10 +9,7 @@ def string_xor(s1, s2):
     if len(s1) != len(s2):
         raise ValueError("mismatched lengths")
 
-    r = []
-    for c1, c2 in zip(s1, s2):
-        r.append(chr(ord(c1) ^ ord(c2)))
-
+    r = [chr(ord(c1) ^ ord(c2)) for c1, c2 in zip(s1, s2)]
     return b''.join(r)
 
 
@@ -32,4 +29,4 @@ hash_xor = string_xor(user_hash, victim_hash)
 
 victim_session = string_xor(session, hash_xor).encode("hex")
 
-print("%s:%s" % (victim, victim_session))
+print(f"{victim}:{victim_session}")

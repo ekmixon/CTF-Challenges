@@ -140,15 +140,14 @@ def lastlogin(u, user):
     u.endutent()
     return lastlogin
 
-def userplan(homedir):          
+def userplan(homedir):      
     try:
+        f = open(f"{homedir}/.plan", "r")
         f = open(homedir+"/.plan", "r")
-        print "Plan:"
         while 1:
             l = f.readline()
             if not l:
                 break
-            print string.rstrip(l)
     except:
         pass
     

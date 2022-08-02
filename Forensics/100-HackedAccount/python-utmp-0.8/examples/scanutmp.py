@@ -21,12 +21,13 @@ for i in ps:
 
 
 for b in a:
-    if b.ut_type == USER_PROCESS:
-        if (b.ut_pid not in pids) or b.ut_user!=pids[b.ut_pid]:
-            print ("%-10s %-10s %5i %-25s %-20s" % (b.ut_user, b.ut_line, b.ut_pid, b.ut_host, time.ctime(b.ut_tv[0])))
-            b.ut_type = DEAD_PROCESS
-            b.ut_host = ''
-            b.ut_tv = (0, 0)
-            a.pututline(b)
-            a.getutent() # to move to next entry
+    if b.ut_type == USER_PROCESS and (
+        (b.ut_pid not in pids) or b.ut_user != pids[b.ut_pid]
+    ):
+        print ("%-10s %-10s %5i %-25s %-20s" % (b.ut_user, b.ut_line, b.ut_pid, b.ut_host, time.ctime(b.ut_tv[0])))
+        b.ut_type = DEAD_PROCESS
+        b.ut_host = ''
+        b.ut_tv = (0, 0)
+        a.pututline(b)
+        a.getutent() # to move to next entry
 

@@ -15,15 +15,12 @@ def formatidle(t):
     if t<30:
         return ""
     if t<80:
-        r = "%ss" % int(t)
-        return r
+        return f"{int(t)}s"
     if t<60*80:
-        return "%sm" % int(t/60)
+        return f"{int(t/60)}m"
     if t<60*60*28:
-        return "%sh" % int(t/60/60)
-    if t<60*60*24*20:
-        return "%sd" % int(t/60/60/24)
-    return "DEAD"
+        return f"{int(t/60/60)}h"
+    return f"{int(t/60/60/24)}d" if t<60*60*24*20 else "DEAD"
 
 def userlist(u, now, user=""):
     u.setutent()
@@ -120,15 +117,14 @@ def lastlogin(u, user):
     u.endutent()
     return lastlogin
 
-def userplan(homedir):          
+def userplan(homedir):      
     try:
+        f = open(f"{homedir}/.plan", "r")
         f = open(homedir+"/.plan", "r")
-        print "Plan:"
         while 1:
             l = f.readline()
             if not l:
                 break
-            print string.rstrip(l)
     except:
         pass
     

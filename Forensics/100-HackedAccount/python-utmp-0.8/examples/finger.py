@@ -15,15 +15,12 @@ def formatidle(t):
     if t<30:
         return ""
     if t<80:
-        r = "%ss" % int(t)
-        return r
+        return f"{int(t)}s"
     if t<60*80:
-        return "%sm" % int(t/60)
+        return f"{int(t/60)}m"
     if t<60*60*28:
-        return "%sh" % int(t/60/60)
-    if t<60*60*24*20:
-        return "%sd" % int(t/60/60/24)
-    return "DEAD"
+        return f"{int(t/60/60)}h"
+    return f"{int(t/60/60/24)}d" if t<60*60*24*20 else "DEAD"
 
 def userlist(u, now, user=""):
     u.setutent()
@@ -60,20 +57,14 @@ def userlist(u, now, user=""):
             location = b.ut_host
             tty = b.ut_line
             try:
-                s = os.stat("/dev/"+tty)
+                s = os.stat(f"/dev/{tty}")
                 p = s[ST_MODE] & 0x30 # 060 octal - test executable bit
-                if tnow<s[ST_ATIME]:
-                    idle = 0
-                else:
-                    idle = tnow-s[ST_ATIME]
+                idle = 0 if tnow<s[ST_ATIME] else tnow-s[ST_ATIME]
                 idle = formatidle(idle)
-                if p:
-                    p = ' '
-                else:
-                    p = '*'
+                p = ' ' if p else '*'
             except:
                 p = '?'
-                
+
             if p == '?':
                 continue
             #length sanitation
@@ -89,7 +80,7 @@ def userlist(u, now, user=""):
                       )
                 #print 60*"-"
                 header = 1
-        
+
             output.append( "%-12s%-7s%4s%2s%-8s%-30s" % 
                    (username,login,idle,p,tty,location) )
     output.sort()
@@ -121,15 +112,14 @@ def lastlogin(u, user):
     u.endutent()
     return lastlogin
 
-def userplan(homedir):          
+def userplan(homedir):      
     try:
-        f = open(homedir+"/.plan", "r")
+        f = open(f"{homedir}/.plan", "r")
         print("Plan:")
         while 1:
             l = f.readline()
             if not l:
                 break
-            print string.rstrip(l)
     except:
         pass
 
@@ -146,7 +136,7 @@ def oneuser(u, user):
     else:
         r = "Last login %-30s  " % time.strftime("%A, %d-%b-%Y %H:%M", time.localtime(l))
         if h:
-            r = r+'from: '+h
+            r = f'{r}from: {h}'
         print(r)
     print('\n')
     userplan(pwent[5])

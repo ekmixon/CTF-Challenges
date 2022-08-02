@@ -45,7 +45,7 @@ class InvalidDisplayText(DisplayText):
 
 
 class TestApp(unittest.TestCase):
-    def setUp(cls):
+    def setUp(self):
         text = DisplayText(DEFAULT_TEXT)
 
         payload = b64encode(pickle.dumps(text))

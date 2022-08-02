@@ -14,7 +14,7 @@ FLAG = "flag{Y-ARHq29rhchpFJjyJyr}"
 @app.get('/api/users/<username>')
 def callback(username, rdb):
     "Returns if an username exists"
-    user = rdb.get("user:%s" % username)
+    user = rdb.get(f"user:{username}")
 
     if user is None:
         bottle.abort(404, "The user does not exist")
@@ -30,33 +30,31 @@ def callback(username, rdb):
                user_jwt.get('timestamp', 0) > user.get('last_timestamp', 0):
 
                 user['last_timestamp'] = max(user.get('timestamp', 0), user_jwt.get('timestamp', 0))
-                rdb.set("user:%s" % user.get('username'), json.dumps(user))
+                rdb.set(f"user:{user.get('username')}", json.dumps(user))
 
                 auth = True
             print(repr(user_jwt))
         except jwt.exceptions.DecodeError as err:
             print(repr(err))
 
-    if auth and user is not None:
-
-        if user.get('show_flag', False):
-            user['locked'] = False
-            rdb.set("user:%s" % user.get('username'), json.dumps(user))
-
-        return {
-            "name": user.get('name'),
-            "username": user.get('username'),
-            "token": user.get('token')
-        }
-    else:
+    if not auth or user is None:
         return {
             'exists': user is not None
         }
+    if user.get('show_flag', False):
+        user['locked'] = False
+        rdb.set(f"user:{user.get('username')}", json.dumps(user))
+
+    return {
+        "name": user.get('name'),
+        "username": user.get('username'),
+        "token": user.get('token')
+    }
 
 @app.get('/api/usert/<token>')
 def callback(token, rdb):
     "Returns the username that belongs to the token"
-    username = rdb.get("token:%s" % token)
+    username = rdb.get(f"token:{token}")
     if username is None:
         bottle.abort(404, "The user does not exist.")
     return {
@@ -70,36 +68,45 @@ def callback(rdb):
     data = bottle.request.json
 
     fields = ["name", "username", "password"]
-    missing_fields = []
-    for field in fields:
-        if field not in data or len(data.get(field)) <= 0:
-            missing_fields.append(field)
+    if missing_fields := [
+        field
+        for field in fields
+        if field not in data or len(data.get(field)) <= 0
+    ]:
+        return {
+            "success": False,
+            "message": f"All fields are required. Missing fields: {', '.join(missing_fields)}",
+        }
 
-    if len(missing_fields) > 0:
-        return {"success": False, "message": "All fields are required. Missing fields: %s" % ', '.join(missing_fields)}
 
-    user = rdb.get("user:%s" % data.get('username'))
+    user = rdb.get(f"user:{data.get('username')}")
     if user is not None:
         return {"success": False, "message": "This username already exists."}
 
     token_generated = False
     while not token_generated:
         token = uuid4().hex
-        rtoken = rdb.get("token:%s" % token)
+        rtoken = rdb.get(f"token:{token}")
         if rtoken is None:
             token_generated = True
 
-    rdb.set("user:%s" % data.get('username'), json.dumps({
-        "name": data.get("name"),
-        "username": data.get("username"),
-        "password": data.get("password"),
-        "token": token,
-        "metric_count": 0,
-        "locked": False,
-        "show_flag": False,
-        "last_timestamp": 0
-    }))
-    rdb.set("token:%s" % token, data.get("username"))
+    rdb.set(
+        f"user:{data.get('username')}",
+        json.dumps(
+            {
+                "name": data.get("name"),
+                "username": data.get("username"),
+                "password": data.get("password"),
+                "token": token,
+                "metric_count": 0,
+                "locked": False,
+                "show_flag": False,
+                "last_timestamp": 0,
+            }
+        ),
+    )
+
+    rdb.set(f"token:{token}", data.get("username"))
 
     return {"success": True}
 
@@ -112,7 +119,7 @@ def callback(rdb):
     if 'username' not in data or 'password' not in data:
         return {"success": False, "message": "Username and Password required"}
 
-    user = rdb.get("user:%s" % data.get('username'))
+    user = rdb.get(f"user:{data.get('username')}")
 
     success = False
     if user is not None:
@@ -145,7 +152,7 @@ def callback(rdb):
         if unvalidated_jwt is None or 'username' not in unvalidated_jwt:
             bottle.abort(403, "Forbidden")
 
-        user = rdb.get("user:%s" % unvalidated_jwt.get('username'))
+        user = rdb.get(f"user:{unvalidated_jwt.get('username')}")
         if user is None:
             bottle.abort(403, "Forbidden")
 
@@ -162,7 +169,7 @@ def callback(rdb):
             user['show_flag'] = True
             user['password'] = "9X%DuAHDj!!PjhQK%p^gPjSgG9"
 
-        rdb.set("user:%s" % user.get('username'), json.dumps(user))
+        rdb.set(f"user:{user.get('username')}", json.dumps(user))
 
         print(repr(user_jwt))
         print(repr(user))

@@ -31,9 +31,7 @@ def generate_token(username, ttl=7200):
 
     plaintext = username + until_bytes
     ciphertext = BOX.encrypt(plaintext)
-    token = base64.urlsafe_b64encode(ciphertext)
-
-    return token
+    return base64.urlsafe_b64encode(ciphertext)
 
 
 def verify_token(token):
@@ -60,7 +58,4 @@ def verify_token(token):
         until = until[0]
 
     now = int(time.time())
-    if now < until:
-        return user
-    else:
-        return None
+    return user if now < until else None

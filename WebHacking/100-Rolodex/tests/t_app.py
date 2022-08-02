@@ -42,14 +42,22 @@ class TestApp(unittest.TestCase):
 
 
     def test_failed_auth(self):
-        r = requests.get("http://127.0.0.1:30878/token", auth=(TEST_USERNAME, TEST_PASSWORD + "--bad--"))
+        r = requests.get(
+            "http://127.0.0.1:30878/token",
+            auth=(TEST_USERNAME, f"{TEST_PASSWORD}--bad--"),
+        )
+
         self.assertEqual(r.status_code, 401)
 
         response = r.json()
         self.assertEqual(response["status"], r.status_code)
         self.assertTrue("error" in response)
 
-        r = requests.get("http://127.0.0.1:30878/token", auth=(TEST_USERNAME + "--bad--", TEST_PASSWORD))
+        r = requests.get(
+            "http://127.0.0.1:30878/token",
+            auth=(f"{TEST_USERNAME}--bad--", TEST_PASSWORD),
+        )
+
         self.assertEqual(r.status_code, 401)
 
         response = r.json()

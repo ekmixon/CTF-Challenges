@@ -33,8 +33,7 @@ def error404(error):
 @get('/')
 def root():
     response.headers["content-type"] = "text/plain"
-    reply = "Hello"
-    return reply
+    return "Hello"
 
 
 @get('/user')
@@ -43,9 +42,7 @@ def user():
     response.headers["content-type"] = "text/plain"
 
     response.status = 404
-    reply = "Please specify a user using /user/<username>"
-
-    return reply
+    return "Please specify a user using /user/<username>"
 
 
 @get('/user/<username>')
@@ -81,8 +78,9 @@ def user_details(username):
 def print_usage():
     """Output the proper usage syntax for this program."""
 
-    print("USAGE: %s sv> [--listen <ip:port>] [--debug]" %
-          os.path.basename(sys.argv[0]))
+    print(
+        f"USAGE: {os.path.basename(sys.argv[0])} sv> [--listen <ip:port>] [--debug]"
+    )
 
 
 def parse_args():
@@ -92,7 +90,7 @@ def parse_args():
         options, _ = getopt(sys.argv[1:], "l:dh",
                             ["listen=", "debug", "help"])
     except GetoptError as e:
-        print("error: %s." % e, file=sys.stderr)
+        print(f"error: {e}.", file=sys.stderr)
         print_usage()
         sys.exit(1)
 

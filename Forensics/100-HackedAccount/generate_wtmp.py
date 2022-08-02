@@ -123,7 +123,7 @@ def get_random_ip(user, login_timestamp):
 create_users()
 create_ips()
 
-print("Bad user is: %s" % BOGUS_USER)
+print(f"Bad user is: {BOGUS_USER}")
 
 
 for entry in xrange(NR_ENTRIES):
@@ -136,7 +136,7 @@ for entry in xrange(NR_ENTRIES):
                              ut_line=LINE_LIST[rand_line], ut_id=TTY_LIST[rand_line],
                              ut_user=user, ut_host=get_random_ip(user, timestamp),
                              ut_tv=(timestamp, randrange(10, time_window)))
-    elif ((entry == BOGUS_ENTRY_INDEX) and (bad_ip < len(BOGUS_IPS))):
+    elif bad_ip < len(BOGUS_IPS):
         NEW_RECORD.pututline(ut_type=USER_PROCESS, ut_pid=get_random_pid(),
                              ut_line=LINE_LIST[rand_line], ut_id=TTY_LIST[rand_line],
                              ut_user=BOGUS_USER, ut_host=BOGUS_IPS[bad_ip],

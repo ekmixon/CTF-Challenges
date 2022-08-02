@@ -65,8 +65,10 @@ for i in range(2):
         sk = ecdsa.SigningKey.from_string(privkey_bytes, curve=ecdsa.SECP256k1)
         print(sk.to_pem().decode())
         hex_privkey = binascii.hexlify(privkey_bytes)
-        print('hex private key: %s, hex sha256 private key: %s' %
-        (hex_privkey, sha256(hex_privkey).hexdigest()))
+        print(
+            f'hex private key: {hex_privkey}, hex sha256 private key: {sha256(hex_privkey).hexdigest()}'
+        )
+
         sig = sk.sign(b'message')
         pubkey.verify(sig, b'message')
 

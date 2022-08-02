@@ -90,7 +90,9 @@ def get_flag(privileged=False):
 
 @route("/", method="GET")
 def get_root():
-    msg = """The following endpoints are available:
+    response.status = 200
+    response.headers["content-type"] = "text/plain"
+    return """The following endpoints are available:
 
 /token - generate a user token
 /flag  - get the flag for this challenge
@@ -101,16 +103,14 @@ You must provide a valid token to read the flag. Either through:
     * The "X-API-Token" header
 
 """
-    response.status = 200
-    response.headers["content-type"] = "text/plain"
-    return msg
 
 
 def print_usage():
     """Output the proper usage syntax for this program."""
 
-    print("USAGE: %s sv> [--listen <ip:port>] [--debug]" %
-        os.path.basename(sys.argv[0]))
+    print(
+        f"USAGE: {os.path.basename(sys.argv[0])} sv> [--listen <ip:port>] [--debug]"
+    )
 
 
 def parse_args():
@@ -120,7 +120,7 @@ def parse_args():
         options, _ = getopt(sys.argv[1:], "l:dh",
                             ["listen=", "debug", "help"])
     except GetoptError as e:
-        print("error: %s." % e, file=sys.stderr)
+        print(f"error: {e}.", file=sys.stderr)
         print_usage()
         sys.exit(1)
 

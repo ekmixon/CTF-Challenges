@@ -263,7 +263,7 @@ def set_user(token, uid, privileged=False):
         raise HTTPError(400, "Invalid JSON")
 
     # The attributes that can be edited...
-    rw_attributes = set(["name", "location", "department", "position", "notes"])
+    rw_attributes = {"name", "location", "department", "position", "notes"}
 
     if set(changes.keys()).difference(rw_attributes):
         response.status = 400
@@ -303,7 +303,7 @@ def parse_args():
                                                             "participants=", "save=",
                                                             "debug", "help"])
     except GetoptError as e:
-        print("error: %s." % e, file=sys.stderr)
+        print(f"error: {e}.", file=sys.stderr)
         print_usage()
         sys.exit(1)
 
@@ -355,7 +355,7 @@ if __name__ == "__main__":
         log.info("Loading participant data from pristine state...")
         participant_data = load_participants(participants)
 
-    save_filename = savefile if savefile else None  # ...save on data modification.
+    save_filename = savefile or None
     employee_data = load_employees(employees)
 
     run(host=listen["host"], port=listen["port"], debug=debug)

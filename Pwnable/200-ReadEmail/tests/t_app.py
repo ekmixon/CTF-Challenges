@@ -38,10 +38,7 @@ def string_xor(s1, s2):
     if len(s1) != len(s2):
         raise ValueError("mismatched lengths")
 
-    r = []
-    for c1, c2 in zip(s1, s2):
-        r.append(chr(ord(c1) ^ ord(c2)))
-
+    r = [chr(ord(c1) ^ ord(c2)) for c1, c2 in zip(s1, s2)]
     return b''.join(r)
 
 
@@ -62,42 +59,52 @@ def get_victim_session_id(victim, attacker_session_id):
 
 class TestApp(unittest.TestCase):
     def setUp(self):
-        r = requests.get("%s/" % APP_URL)
+        r = requests.get(f"{APP_URL}/")
         self.csrf_token = r.cookies["csrftoken"]
 
 
     def test_trigger_debug(self):
         """Ensure the fake debug page returns the necessary challenge hints."""
 
-        r = requests.post("%s/login" % APP_URL,
-                          cookies={"csrftoken": self.csrf_token},
-                          data={"csrfmiddlewaretoken": self.csrf_token,
-                                "username": "ã",  # ...any special character.
-                                "password": "",
-                                "submit": "Submit"})
+        r = requests.post(
+            f"{APP_URL}/login",
+            cookies={"csrftoken": self.csrf_token},
+            data={
+                "csrfmiddlewaretoken": self.csrf_token,
+                "username": "ã",  # ...any special character.
+                "password": "",
+                "submit": "Submit",
+            },
+        )
+
 
         self.assertEqual(r.status_code, 200)
         self.assertTrue("stream_cipher" in r.text)
-        self.assertTrue("/home/%s/" % VICTIM_USERNAME in r.text)
+        self.assertTrue(f"/home/{VICTIM_USERNAME}/" in r.text)
 
 
     def test_attacker_login(self):
         """Ensure the attacker can login successfully and read email."""
 
         with requests.Session() as s:
-            r = s.post("%s/login" % APP_URL,
-                       cookies={"csrftoken": self.csrf_token},
-                       data={"csrfmiddlewaretoken": self.csrf_token,
-                             "username": ATTACKER_USERNAME,
-                             "password": ATTACKER_PASSWORD,
-                             "submit": "Submit"})
+            r = s.post(
+                f"{APP_URL}/login",
+                cookies={"csrftoken": self.csrf_token},
+                data={
+                    "csrfmiddlewaretoken": self.csrf_token,
+                    "username": ATTACKER_USERNAME,
+                    "password": ATTACKER_PASSWORD,
+                    "submit": "Submit",
+                },
+            )
+
 
             # The list of emails can be seen...
             self.assertEqual(r.status_code, 200)
             self.assertTrue(EMAILS[ATTACKER_USERNAME][0][0] in r.text)  # ...subject.
 
             # There's an email from the system administrator...
-            r = s.get("%s/viewmail/1/" % APP_URL)
+            r = s.get(f"{APP_URL}/viewmail/1/")
             self.assertEqual(r.status_code, 200)
             self.assertTrue(VICTIM_USERNAME in r.text.lower())
 
@@ -106,12 +113,17 @@ class TestApp(unittest.TestCase):
         """Ensure we can successfully get the challenge flag."""
 
         with requests.Session() as s:
-            r = s.post("%s/login" % APP_URL,
-                       cookies={"csrftoken": self.csrf_token},
-                       data={"csrfmiddlewaretoken": self.csrf_token,
-                             "username": ATTACKER_USERNAME,
-                             "password": ATTACKER_PASSWORD,
-                             "submit": "Submit"})
+            r = s.post(
+                f"{APP_URL}/login",
+                cookies={"csrftoken": self.csrf_token},
+                data={
+                    "csrfmiddlewaretoken": self.csrf_token,
+                    "username": ATTACKER_USERNAME,
+                    "password": ATTACKER_PASSWORD,
+                    "submit": "Submit",
+                },
+            )
+
 
             # The list of *attacker* emails can be seen...
             self.assertEqual(r.status_code, 200)
@@ -123,7 +135,7 @@ class TestApp(unittest.TestCase):
             s.cookies.set(sid.name, victim_sid, domain=sid.domain)
 
             # The flag is contained in the first email...
-            r = s.get("%s/viewmail/1/" % APP_URL)
+            r = s.get(f"{APP_URL}/viewmail/1/")
             self.assertEqual(r.status_code, 200)
             self.assertTrue("Your answer is " in r.text)
 

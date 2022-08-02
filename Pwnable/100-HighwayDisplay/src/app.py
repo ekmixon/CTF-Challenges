@@ -68,10 +68,8 @@ def ensure_challenge_invariant(func):
 @ensure_challenge_invariant
 def get_text():
     text = DisplayText(current_text)
-    payload = b64encode(pickle.dumps(text))
-
     response.status = 200
-    return payload
+    return b64encode(pickle.dumps(text))
 
 
 @route("/text", method="POST")
@@ -96,24 +94,20 @@ def set_text():
         raise HTTPError(400, "invalid request")
 
     # Another safety-check: abort if the object looks suspicious...
-    if not (isinstance(text, DisplayText) or isinstance(text, unicode)):
+    if not isinstance(text, (DisplayText, unicode)):
         log.critical("BREACH! Payload: %s", repr(payload[:64]))
         os._exit(1)
 
     log.info("Payload text: %s", text)
-    proposed_text = str(text)[:DISPLAY_LENGTH]
-
     global current_text
-    current_text = proposed_text
-
     response.status = 200
-    return current_text
+    return str(text)[:DISPLAY_LENGTH]
 
 
 def print_usage():
     """Output the proper usage syntax for this program."""
 
-    print("USAGE: %s [--listen <ip:port>] [--debug]" % os.path.basename(sys.argv[0]))
+    print(f"USAGE: {os.path.basename(sys.argv[0])} [--listen <ip:port>] [--debug]")
 
 
 def parse_args():
@@ -122,7 +116,7 @@ def parse_args():
     try:
         options, args = getopt(sys.argv[1:], "l:dh", ["listen=", "debug", "help"])
     except GetoptError as e:
-        print("error: %s." % e, file=sys.stderr)
+        print(f"error: {e}.", file=sys.stderr)
         print_usage()
         sys.exit(1)
 
